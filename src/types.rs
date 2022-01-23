@@ -9,7 +9,7 @@ pub struct Ball;
 #[derive(Component)]
 pub struct Paddle(pub Player);
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Moving {
     pub velocity: Vec3
 }
@@ -18,7 +18,7 @@ pub struct Moving {
 pub enum Collider {
     Wall,
     Ball,
-    Paddle(Player),
+    Paddle,
     Goal(Player)
 }
 
@@ -39,6 +39,9 @@ pub struct GoalText;
 
 #[derive(Component)]
 pub struct WinText;
+
+#[derive(Component)]
+pub struct ReadyText;
 
 pub enum PongEvent {
     Goal(Player),

@@ -7,7 +7,7 @@ pub fn setup(mut commands: Commands,
          mut meshes: ResMut<Assets<Mesh>>,
          mut materials: ResMut<Assets<StandardMaterial>>,
          asset_server: Res<AssetServer>) {
-    // println!("Setup");
+    debug!("Setup");
     // Floor
     let floor_material = materials.add(StandardMaterial {
         base_color: Color::rgb(1.0, 1.0, 1.0),
@@ -71,7 +71,7 @@ pub fn setup(mut commands: Commands,
         ..Default::default()
     })
     .insert(Ball)
-    .insert(Moving { velocity: Vec3::new(3.0, 3.0, 0.0) })
+    .insert(Moving { velocity: Vec3::new(BALL_SPEED, BALL_SPEED, 0.0) })
     .insert(Colliding { kind: Collider::Ball, size: Vec2::new(BALL_SIZE, BALL_SIZE) })
     .with_children(|parent| {
         parent.spawn_bundle(PointLightBundle {
@@ -93,7 +93,9 @@ pub fn setup(mut commands: Commands,
         transform: Transform::from_xyz(-AREA_WIDTH/2.0 + WALL_THICKNESS + PADDLE_THICKNESS, 0.0, 0.0),
         ..Default::default()
     })
-    .insert(Colliding { kind: Collider::Paddle(Player::Left), size: paddle_size.truncate() });
+    .insert(Colliding { kind: Collider::Paddle, size: paddle_size.truncate() })
+    .insert(Moving::default())
+    .insert(Paddle(Player::Left));
 
     let paddle_size = Vec3::new(PADDLE_THICKNESS, PADDLE_LENGTH, WALL_THICKNESS);
     commands.spawn_bundle(PbrBundle {
@@ -102,7 +104,9 @@ pub fn setup(mut commands: Commands,
         transform: Transform::from_xyz(AREA_WIDTH/2.0 - WALL_THICKNESS - PADDLE_THICKNESS, 0.0, 0.0),
         ..Default::default()
     })
-    .insert(Colliding { kind: Collider::Paddle(Player::Right), size: paddle_size.truncate() });
+    .insert(Colliding { kind: Collider::Paddle, size: paddle_size.truncate() })
+    .insert(Moving::default())
+    .insert(Paddle(Player::Right));
 
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
@@ -133,9 +137,10 @@ pub fn setup(mut commands: Commands,
     // UI camera
     commands.spawn_bundle(UiCameraBundle::default());
 
+    let font = asset_server.load("fonts/DejaVuSansMono-Bold.ttf");
     // Scores
     let text_style = TextStyle {
-        font: asset_server.load("fonts/DejaVuSansMono-Bold.ttf"),
+        font: font.clone(),
         font_size: 50.0,
         color: Color::WHITE
     };
@@ -169,5 +174,37 @@ pub fn setup(mut commands: Commands,
         ..Default::default()
     })
     .insert(ScoreText(Player::Right));
+
+    commands.spawn_bundle(TextBundle {
+        text: Text::with_section("", TextStyle {
+            font: font.clone(),
+            font_size: 100.0,
+            color: Color::WHITE
+        }, TextAlignment::default()),
+        style: Style {
+            display: Display::None,
+            margin: Rect::all(Val::Auto),
+            align_self: AlignSelf::Center,
+            ..Style::default()
+        },
+        ..Default::default()
+    })
+    .insert(ReadyText);
+
+    commands.spawn_bundle(TextBundle {
+        text: Text::with_section("G O A L !", TextStyle {
+            font: font.clone(),
+            font_size: 100.0,
+            color: Color::WHITE
+        }, TextAlignment::default()),
+        style: Style {
+            display: Display::None,
+            margin: Rect::all(Val::Auto),
+            align_self: AlignSelf::Center,
+            ..Style::default()
+        },
+        ..Default::default()
+    })
+    .insert(GoalText);
 }
 
