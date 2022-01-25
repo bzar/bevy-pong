@@ -23,39 +23,38 @@ pub fn setup(mut commands: Commands,
     });
 
     // Walls
-    let wall_material = materials.add(Color::rgb(0.5, 0.5, 0.1).into());
-    let wall_size = Vec3::new(AREA_WIDTH, WALL_THICKNESS, WALL_THICKNESS);
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(wall_size.x, wall_size.y, wall_size.z))),
-        material: wall_material.clone(),
-        transform: Transform::from_xyz(0.0, AREA_HEIGHT/2.0, 0.0),
-        ..Default::default()
-    })
-    .insert(Colliding { kind: Collider::Wall, size: wall_size.truncate() });
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(wall_size.x, wall_size.y, wall_size.z))),
-        material: wall_material,
-        transform: Transform::from_xyz(0.0, -AREA_HEIGHT/2.0, 0.0),
-        ..Default::default()
-    })
-    .insert(Colliding { kind: Collider::Wall, size: wall_size.truncate() });
+    {
+        let material = materials.add(Color::rgb(0.5, 0.5, 0.1).into());
+        let size = Vec3::new(AREA_WIDTH, WALL_THICKNESS, WALL_THICKNESS);
+        let mesh = meshes.add(Mesh::from(shape::Box::new(size.x, size.y, size.z)));
+        let data = [AREA_HEIGHT/2.0, -AREA_HEIGHT/2.0];
+        for y in data {
+            commands.spawn_bundle(PbrBundle {
+                mesh: mesh.clone(),
+                material: material.clone(),
+                transform: Transform::from_xyz(0.0, y, 0.0),
+                ..Default::default()
+            }).insert(Colliding { kind: Collider::Wall, size: size.truncate() });
+        }
+    }
 
     // Goals
-    let goal_size = Vec3::new(WALL_THICKNESS, AREA_HEIGHT - WALL_THICKNESS, WALL_THICKNESS);
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(goal_size.x, goal_size.y, goal_size.z))),
-        material: materials.add(Color::rgb(0.8, 0.1, 0.1).into()),
-        transform: Transform::from_xyz((WALL_THICKNESS - AREA_WIDTH)/2.0, 0.0, 0.0),
-        ..Default::default()
-    })
-    .insert(Colliding { kind: Collider::Goal(Player::Right), size: goal_size.truncate() });
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(goal_size.x, goal_size.y, goal_size.z))),
-        material: materials.add(Color::rgb(0.1, 0.1, 0.8).into()),
-        transform: Transform::from_xyz((AREA_WIDTH - WALL_THICKNESS)/2.0, 0.0, 0.0),
-        ..Default::default()
-    })
-    .insert(Colliding { kind: Collider::Goal(Player::Left), size: goal_size.truncate() });
+    {
+        let size = Vec3::new(WALL_THICKNESS, AREA_HEIGHT - WALL_THICKNESS, WALL_THICKNESS);
+        let mesh = meshes.add(Mesh::from(shape::Box::new(size.x, size.y, size.z)));
+        let data = [
+            (Player::Right, Color::rgb(0.8, 0.1, 0.1), (WALL_THICKNESS - AREA_WIDTH) / 2.0),
+            (Player::Left, Color::rgb(0.1, 0.1, 0.8), (AREA_WIDTH - WALL_THICKNESS) / 2.0)
+        ];
+        for (player, color, x) in data {
+            commands.spawn_bundle(PbrBundle {
+                mesh: mesh.clone(),
+                material: materials.add(color.into()),
+                transform: Transform::from_xyz(x, 0.0, 0.0),
+                ..Default::default()
+            }).insert(Colliding { kind: Collider::Goal(player), size: size.truncate() });
+        }
+    }
 
     // Ball
     let ball_material = StandardMaterial {
@@ -86,27 +85,22 @@ pub fn setup(mut commands: Commands,
     });
 
     // Paddles
-    let paddle_size = Vec3::new(PADDLE_THICKNESS, PADDLE_LENGTH, WALL_THICKNESS);
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(paddle_size.x, paddle_size.y, paddle_size.z))),
-        material: materials.add(Color::rgb(0.6, 0.3, 0.3).into()),
-        transform: Transform::from_xyz(-AREA_WIDTH/2.0 + WALL_THICKNESS + PADDLE_THICKNESS, 0.0, 0.0),
-        ..Default::default()
-    })
-    .insert(Colliding { kind: Collider::Paddle, size: paddle_size.truncate() })
-    .insert(Moving::default())
-    .insert(Paddle(Player::Left));
-
-    let paddle_size = Vec3::new(PADDLE_THICKNESS, PADDLE_LENGTH, WALL_THICKNESS);
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(paddle_size.x, paddle_size.y, paddle_size.z))),
-        material: materials.add(Color::rgb(0.3, 0.3, 0.6).into()),
-        transform: Transform::from_xyz(AREA_WIDTH/2.0 - WALL_THICKNESS - PADDLE_THICKNESS, 0.0, 0.0),
-        ..Default::default()
-    })
-    .insert(Colliding { kind: Collider::Paddle, size: paddle_size.truncate() })
-    .insert(Moving::default())
-    .insert(Paddle(Player::Right));
+    {
+        let size = Vec3::new(PADDLE_THICKNESS, PADDLE_LENGTH, WALL_THICKNESS);
+        let mesh = meshes.add(Mesh::from(shape::Box::new(size.x, size.y, size.z)));
+        let data = [
+            (Player::Left, -AREA_WIDTH/2.0 + WALL_THICKNESS + PADDLE_THICKNESS, Color::rgb(0.6, 0.3, 0.3)),
+            (Player::Right, AREA_WIDTH/2.0 - WALL_THICKNESS - PADDLE_THICKNESS, Color::rgb(0.3, 0.3, 0.6)),
+        ];
+        for (player, x, color) in data {
+            let transform = Transform::from_xyz(x, 0.0, 0.0);
+            let material = materials.add(color.into());
+            commands.spawn_bundle(PbrBundle { mesh: mesh.clone(), material, transform, ..Default::default() })
+                .insert(Colliding { kind: Collider::Paddle, size: size.truncate() })
+                .insert(Moving::default())
+                .insert(Paddle(player));
+        }
+    }
 
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
@@ -207,4 +201,3 @@ pub fn setup(mut commands: Commands,
     })
     .insert(GoalText);
 }
-
