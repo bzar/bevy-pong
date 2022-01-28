@@ -6,7 +6,7 @@ pub const PADDLE_LENGTH: f32 = 1.0;
 pub const PADDLE_THICKNESS: f32 = 0.3;
 pub const GOALS_TO_WIN: u32 = 3;
 pub const READY_DURATION: f32 = 3.0;
-pub const PADDLE_SPEED: f32 = 2.0;
-pub const BALL_SPEED: f32 = 2.0;
+pub const PADDLE_SPEED: f32 = 5.0;
+pub const BALL_SPEED: f32 = 5.0;
 
 

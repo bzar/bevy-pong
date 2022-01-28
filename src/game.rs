@@ -111,9 +111,9 @@ fn paddle_input(mut paddle_query: Query<(&Paddle, &mut Moving)>,
     }
 }
 
-fn move_system(mut moving_query: Query<(&Moving, &mut Transform)>) {
+fn move_system(mut moving_query: Query<(&Moving, &mut Transform)>, time: Res<Time>) {
     for (moving, mut transform) in moving_query.iter_mut() {
-        transform.translation += moving.velocity * 1.0 / 30.0;
+        transform.translation += moving.velocity * time.delta().as_secs_f32();
     }
 }
 
