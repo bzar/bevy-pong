@@ -30,11 +30,11 @@ pub fn title_enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     .insert(TitleText)
     .with_children(|parent| {
         parent.spawn_bundle(TextBundle {
-            text: Text::with_section("Pong", TextStyle {
+            text: Text::from_section("Pong", TextStyle {
                 font: asset_server.load("fonts/DejaVuSansMono-Bold.ttf"),
                 font_size: 100.0,
                 color: Color::WHITE
-            }, TextAlignment::default()),
+            }),
             style: Style {
                 ..Default::default()
             },
@@ -42,11 +42,11 @@ pub fn title_enter(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 
         parent.spawn_bundle(TextBundle {
-            text: Text::with_section("Press SPACE to start!", TextStyle {
+            text: Text::from_section("Press SPACE to start!", TextStyle {
                 font: asset_server.load("fonts/DejaVuSansMono-Bold.ttf"),
                 font_size: 70.0,
                 color: Color::GRAY
-            }, TextAlignment::default()),
+            }),
             style: Style {
                 ..Default::default()
             },

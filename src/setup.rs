@@ -103,7 +103,7 @@ pub fn setup(mut commands: Commands,
     }
 
     // camera
-    commands.spawn_bundle(PerspectiveCameraBundle {
+    commands.spawn_bundle(Camera3dBundle {
         transform: Transform::from_xyz(0.0, -AREA_HEIGHT/2.0, AREA_WIDTH).looking_at(Vec3::ZERO, Vec3::Z),
         ..Default::default()
     });
@@ -129,7 +129,7 @@ pub fn setup(mut commands: Commands,
     });
 
     // UI camera
-    commands.spawn_bundle(UiCameraBundle::default());
+    // commands.spawn_bundle(Camera2dBundle::default());
 
     let font = asset_server.load("fonts/DejaVuSansMono-Bold.ttf");
     // Scores
@@ -140,10 +140,10 @@ pub fn setup(mut commands: Commands,
     };
 
     commands.spawn_bundle(TextBundle {
-        text: Text::with_section("0", text_style.clone(), TextAlignment::default()),
+        text: Text::from_section("0", text_style.clone()),
         style: Style {
             position_type: PositionType::Absolute,
-            position: Rect {
+            position: UiRect {
                 top: Val::Px(5.0),
                 left: Val::Px(5.0),
                 ..Default::default()
@@ -155,10 +155,10 @@ pub fn setup(mut commands: Commands,
     .insert(ScoreText(Player::Left));
 
     commands.spawn_bundle(TextBundle {
-        text: Text::with_section("0", text_style, TextAlignment::default()),
+        text: Text::from_section("0", text_style),
         style: Style {
             position_type: PositionType::Absolute,
-            position: Rect {
+            position: UiRect {
                 top: Val::Px(5.0),
                 right: Val::Px(5.0),
                 ..Default::default()
@@ -170,14 +170,14 @@ pub fn setup(mut commands: Commands,
     .insert(ScoreText(Player::Right));
 
     commands.spawn_bundle(TextBundle {
-        text: Text::with_section("", TextStyle {
+        text: Text::from_section("", TextStyle {
             font: font.clone(),
             font_size: 100.0,
             color: Color::WHITE
-        }, TextAlignment::default()),
+        }),
         style: Style {
             display: Display::None,
-            margin: Rect::all(Val::Auto),
+            margin: UiRect::all(Val::Auto),
             align_self: AlignSelf::Center,
             ..Style::default()
         },
@@ -186,14 +186,14 @@ pub fn setup(mut commands: Commands,
     .insert(ReadyText);
 
     commands.spawn_bundle(TextBundle {
-        text: Text::with_section("G O A L !", TextStyle {
+        text: Text::from_section("G O A L !", TextStyle {
             font: font.clone(),
             font_size: 100.0,
             color: Color::WHITE
-        }, TextAlignment::default()),
+        }),
         style: Style {
             display: Display::None,
-            margin: Rect::all(Val::Auto),
+            margin: UiRect::all(Val::Auto),
             align_self: AlignSelf::Center,
             ..Style::default()
         },

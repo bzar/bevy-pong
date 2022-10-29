@@ -10,7 +10,8 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_system_set(SystemSet::on_enter(AppState::NewGame).with_system(new_game))
+            // For some reason on_enter fails in setting the new state
+            .add_system_set(SystemSet::on_update(AppState::NewGame).with_system(new_game))
             .add_system_set(SystemSet::on_enter(AppState::Ready).with_system(ready_enter))
             .add_system_set(SystemSet::on_update(AppState::Ready).with_system(ready_update))
             .add_system_set(SystemSet::on_exit(AppState::Ready).with_system(ready_exit))
@@ -123,6 +124,7 @@ fn bounce(moving: &mut Moving, collision: &Collision) {
         Collision::Bottom => moving.velocity.y = -moving.velocity.y.abs(),
         Collision::Left => moving.velocity.x = -moving.velocity.x.abs(),
         Collision::Right => moving.velocity.x = moving.velocity.x.abs(),
+        Collision::Inside => (),
     }
 }
 fn ball_collide_system(mut ball_query: Query<(Entity, &Colliding, &mut Moving, &Transform), With<Ball>>,
@@ -215,13 +217,13 @@ fn win_enter(mut commands: Commands,
     debug!("Win");
     let winner_text = if score.left > score.right { "Left" } else { "Right" };
     commands.spawn_bundle(TextBundle {
-        text: Text::with_section(format!("{} player wins!", winner_text), TextStyle {
+        text: Text::from_section(format!("{} player wins!", winner_text), TextStyle {
             font: asset_server.load("fonts/DejaVuSansMono-Bold.ttf"),
             font_size: 100.0,
             color: Color::WHITE
-        }, TextAlignment::default()),
+        }),
         style: Style {
-            margin: Rect::all(Val::Auto),
+            margin: UiRect::all(Val::Auto),
             align_self: AlignSelf::Center,
             ..Style::default()
         },
