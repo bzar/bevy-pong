@@ -87,7 +87,9 @@ pub fn ready_exit(mut ready_text_query: Query<&mut Style, With<ReadyText>>) {
 //
 
 fn paddle_input(mut paddle_query: Query<(&Paddle, &mut Moving)>,
-                keyboard_input: Res<Input<KeyCode>>) {
+                keyboard_input: Res<Input<KeyCode>>,
+                gamepads: Res<Gamepads>,
+                gamepad_axes: Res<Axis<GamepadAxis>>) {
     let mut left_velocity = Vec3::ZERO;
     let mut right_velocity = Vec3::ZERO;
 
@@ -102,6 +104,15 @@ fn paddle_input(mut paddle_query: Query<(&Paddle, &mut Moving)>,
     }
     if keyboard_input.pressed(KeyCode::M) {
         right_velocity.y -= PADDLE_SPEED;
+    }
+    
+    for gamepad in gamepads.iter() {
+        let left_stick_y = gamepad_axes.get(GamepadAxis::new(*gamepad, GamepadAxisType::LeftStickY))
+            .unwrap_or(0.0);
+        let right_stick_y = gamepad_axes.get(GamepadAxis::new(*gamepad, GamepadAxisType::RightStickY))
+            .unwrap_or(0.0);
+        left_velocity.y += left_stick_y * PADDLE_SPEED;
+        right_velocity.y += right_stick_y * PADDLE_SPEED;
     }
     
     for (Paddle(player), mut paddle_moving) in paddle_query.iter_mut() {

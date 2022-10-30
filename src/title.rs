@@ -30,25 +30,26 @@ pub fn title_enter(mut commands: Commands, asset_server: Res<AssetServer>) {
     .insert(TitleText)
     .with_children(|parent| {
         parent.spawn_bundle(TextBundle {
-            text: Text::from_section("Pong", TextStyle {
-                font: asset_server.load("fonts/DejaVuSansMono-Bold.ttf"),
-                font_size: 100.0,
-                color: Color::WHITE
-            }),
-            style: Style {
-                ..Default::default()
-            },
-            ..Default::default()
-        });
-
-        parent.spawn_bundle(TextBundle {
-            text: Text::from_section("Press SPACE to start!", TextStyle {
-                font: asset_server.load("fonts/DejaVuSansMono-Bold.ttf"),
-                font_size: 70.0,
-                color: Color::GRAY
-            }),
-            style: Style {
-                ..Default::default()
+            text: Text {
+                sections: vec![
+                    TextSection {
+                        value: "Pong".to_string(),
+                        style: TextStyle {
+                            font: asset_server.load("fonts/DejaVuSansMono-Bold.ttf"),
+                            font_size: 100.0,
+                            color: Color::WHITE
+                        }
+                    },
+                    TextSection {
+                        value: "\nPress SPACE/A to start!".to_string(),
+                        style: TextStyle {
+                            font: asset_server.load("fonts/DejaVuSansMono-Bold.ttf"),
+                            font_size: 70.0,
+                            color: Color::GRAY
+                        }
+                    }
+                ],
+               alignment: TextAlignment::TOP_CENTER
             },
             ..Default::default()
         });
@@ -57,10 +58,24 @@ pub fn title_enter(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 pub fn title_update(mut exit_events: EventWriter<AppExit>,
                     mut state: ResMut<State<AppState>>,
-                    keyboard_input: Res<Input<KeyCode>>) {
-    if keyboard_input.just_released(KeyCode::Space) {
+                    keyboard_input: Res<Input<KeyCode>>,
+                    gamepads: Res<Gamepads>,
+                    gamepad_buttons: Res<Input<GamepadButton>>) {
+    let mut start = keyboard_input.just_released(KeyCode::Space);
+    let mut quit = keyboard_input.just_released(KeyCode::Escape);
+
+    for gamepad in gamepads.iter() {
+        if gamepad_buttons.just_released(GamepadButton::new(*gamepad, GamepadButtonType::South)) {
+            start = true;
+        }
+        if gamepad_buttons.just_released(GamepadButton::new(*gamepad, GamepadButtonType::East)) {
+            quit = true;
+        }
+    }
+    
+    if start {
         state.set(AppState::NewGame).unwrap()
-    } else if keyboard_input.just_released(KeyCode::Escape) {
+    } else if quit {
         exit_events.send(AppExit);
     }
 }
